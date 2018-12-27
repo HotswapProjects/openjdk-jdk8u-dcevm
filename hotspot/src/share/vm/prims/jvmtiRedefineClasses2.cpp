@@ -1763,8 +1763,8 @@ void VM_EnhancedRedefineClasses::redefine_single_class(instanceKlassHandle the_n
 
   // increment the classRedefinedCount field in the_class and in any
   // direct and indirect subclasses of the_class
-  increment_class_counter((InstanceKlass *)the_old_class(), THREAD);
-
+  increment_class_counter((InstanceKlass *)the_new_class(), THREAD);
+  
 }
 
 
@@ -1864,10 +1864,10 @@ void VM_EnhancedRedefineClasses::check_methods_and_mark_as_obsolete(BitMap *emcp
 
 // Increment the classRedefinedCount field in the specific InstanceKlass
 // and in all direct and indirect subclasses.
-void VM_EnhancedRedefineClasses::increment_class_counter(Klass* klass, TRAPS) {
-  oop class_mirror = klass->java_mirror();
+void VM_EnhancedRedefineClasses::increment_class_counter(Klass* klass, TRAPS) {      
+  oop class_mirror = klass->old_version()->java_mirror();
   int new_count = java_lang_Class::classRedefinedCount(class_mirror) + 1;
-  java_lang_Class::set_classRedefinedCount(class_mirror, new_count);
+  java_lang_Class::set_classRedefinedCount(klass->java_mirror(), new_count);
   RC_TRACE(0x00000008, ("updated count for class=%s to %d", klass->external_name(), new_count));
 }
 

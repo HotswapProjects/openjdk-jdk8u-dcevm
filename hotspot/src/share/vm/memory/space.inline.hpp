@@ -83,6 +83,7 @@ inline HeapWord* Space::block_start(const void* p) {
   _first_dead = first_dead;                                                  \
                                                                              \
   const intx interval = PrefetchScanIntervalInBytes;                         \
+  bool force_forward = false;                                                \
                                                                              \
   while (q < t) {                                                            \
     assert(!block_is_obj(q) ||                                               \
@@ -94,15 +95,17 @@ inline HeapWord* Space::block_start(const void* p) {
       Prefetch::write(q, interval);                                          \
       size_t size = block_size(q);                                           \
       if (redefinition_run) {                                                \
-        compact_top = cp->space->forward_with_rescue(q, size,                \
-                                                     cp, compact_top);       \
+        compact_top = cp->space->forward_with_rescue(q, size,cp,             \
+                                     compact_top, force_forward);            \
         if (q < first_dead && oop(q)->is_gc_marked()) {                      \
           /* Was moved (otherwise, forward would reset mark),                \
              set first_dead to here */                                       \
           first_dead = q;                                                    \
+          force_forward = true;                                              \
         }                                                                    \
       } else {                                                               \
-      compact_top = cp->space->forward(oop(q), size, cp, compact_top);       \
+          compact_top = cp->space->forward(oop(q), size, cp, compact_top,    \
+              false);                                                        \
       }                                                                      \
       q += size;                                                             \
       end_of_live = q;                                                       \
@@ -121,7 +124,8 @@ inline HeapWord* Space::block_start(const void* p) {
       if (allowed_deadspace > 0 && q == compact_top) {                       \
         size_t sz = pointer_delta(end, q);                                   \
         if (insert_deadspace(allowed_deadspace, q, sz)) {                    \
-          compact_top = cp->space->forward(oop(q), sz, cp, compact_top);     \
+          compact_top = cp->space->forward(oop(q), sz, cp, compact_top,      \
+              force_forward);                                                \
           q = end;                                                           \
           end_of_live = end;                                                 \
           continue;                                                          \
@@ -285,7 +289,8 @@ inline HeapWord* Space::block_start(const void* p) {
       Prefetch::write(compaction_top, copy_interval);                           \
                                                                                 \
       /* copy object and reinit its mark */                                     \
-      assert(q != compaction_top || oop(q)->klass()->new_version() != NULL,     \
+      assert(redefinition_run || q != compaction_top ||                         \
+          oop(q)->klass()->new_version() != NULL,                               \
              "everything in this pass should be moving");                       \
       if (redefinition_run && oop(q)->klass()->new_version() != NULL) {         \
         Klass* new_version = oop(q)->klass()->new_version();                    \

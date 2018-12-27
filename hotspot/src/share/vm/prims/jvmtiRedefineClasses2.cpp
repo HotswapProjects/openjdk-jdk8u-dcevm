@@ -784,8 +784,10 @@ int VM_EnhancedRedefineClasses::calculate_redefinition_flags(instanceKlassHandle
         if (idnum_owner != NULL) {
           // There is already a method assigned this idnum -- switch them
           idnum_owner->set_method_idnum(new_num);
+          idnum_owner->set_orig_method_idnum(k_new_method->orig_method_idnum());
         }
         k_new_method->set_method_idnum(old_num);
+        k_new_method->set_orig_method_idnum(k_old_method->orig_method_idnum());
         RC_TRACE(0x00008000,
             ("swapping idnum of new and old method %d / %d!", new_num, old_num));
       }
@@ -816,9 +818,12 @@ int VM_EnhancedRedefineClasses::calculate_redefinition_flags(instanceKlassHandle
       Method* idnum_owner = new_class->method_with_idnum(num);
       if (idnum_owner != NULL) {
         // There is already a method assigned this idnum -- switch them
+        // Take current and original idnum from the new_method
         idnum_owner->set_method_idnum(new_num);
+        idnum_owner->set_orig_method_idnum(k_new_method->orig_method_idnum());
       }
       k_new_method->set_method_idnum(num);
+      k_new_method->set_orig_method_idnum(num);
     }
     RC_TRACE(0x00008000, ("Method added: new: %s [%d], idnum %d",
                          k_new_method->name_and_sig_as_C_string(), ni, k_new_method->method_idnum()));

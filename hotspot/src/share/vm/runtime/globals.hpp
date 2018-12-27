@@ -3993,7 +3993,16 @@ class CommandLineFlags {
                                                                             \
   product_pd(bool, PreserveFramePointer,                                    \
              "Use the FP register for holding the frame pointer "           \
-             "and not as a general purpose register.")
+             "and not as a general purpose register.")                      \
+                                                                            \
+  product(ccstr, HotswapDeoptClassPath, NULL,                               \
+          "Comma separated list of packages containing classes that are "   \
+          "expected to be redefined. If com.sun.proxy is used by "          \
+          "application and proxied class is redefined, then this option "   \
+          "should contain 'com.sun.proxy'. If the option is not defined, "  \
+          "then all classes will be deoptimized on hotswap. Using this "    \
+          "option improves hotswap performance. ")
+
 
 /*
  *  Macros for factoring of globals

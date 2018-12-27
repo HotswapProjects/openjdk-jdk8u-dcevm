@@ -177,6 +177,7 @@ class Klass : public Metadata {
   bool        _original_field_offsets_changed; // Did the original field offsets of this class change during class redefinition?
   int *       _update_information;     // Update information
   bool        _is_redefining;
+  bool        _deoptimization_incl; // True if class methods are included in deoptimization
 
   // Biased locking implementation and statistics
   // (the 64-bit chunk goes first, to avoid some fragmentation)
@@ -265,6 +266,9 @@ protected:
   // update information
   int *update_information() const                      { return _update_information; }
   void set_update_information(int *info)               { _update_information = info; }
+
+  bool  is_deoptimization_incl() const                 { return _deoptimization_incl; }
+  void  set_deoptimization_incl(bool z)                { _deoptimization_incl = z; }
 
   // Revision number for redefined classes, -1 for originally loaded classes
   bool was_redefined() const            { return _revision_number != -1; }

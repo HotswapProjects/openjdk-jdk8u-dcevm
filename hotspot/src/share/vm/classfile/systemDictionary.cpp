@@ -1258,6 +1258,31 @@ instanceKlassHandle SystemDictionary::load_shared_class(instanceKlassHandle ik,
       ik->restore_unshareable_info(loader_data, protection_domain, CHECK_(nh));
     }
 
+    if (HotswapDeoptClassPath != NULL) {
+      const char* deopt_path = HotswapDeoptClassPath;
+      const char* const end = deopt_path + strlen(deopt_path);
+      bool deopt_found = false;
+      while (!deopt_found && deopt_path < end) {
+        const char* tmp_end = strchr(deopt_path, ',');
+        if (tmp_end == NULL) {
+          tmp_end = end;
+        }
+        char* deopt_segm_path = NEW_C_HEAP_ARRAY(char, tmp_end - deopt_path + 1, mtInternal);
+        memcpy(deopt_segm_path, deopt_path, tmp_end - deopt_path);
+        deopt_segm_path[tmp_end - deopt_path] = '\0';
+        if (strstr(ik->external_name(), deopt_segm_path) != NULL) {
+          if (TraceRedefineClasses > 0) {
+            tty->print_cr("Including in deoptimization : %s", ik->external_name());
+          }
+          ik->set_deoptimization_incl(true);
+          deopt_found = true;
+        }
+        FREE_C_HEAP_ARRAY(char, deopt_segm_path, mtInternal);
+        deopt_path = tmp_end + 1;
+      }
+    }
+
+
     if (TraceClassLoading) {
       ResourceMark rm;
       tty->print("[Loaded %s", ik->external_name());

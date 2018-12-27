@@ -201,6 +201,7 @@ Klass::Klass() {
 
   set_redefinition_flags(Klass::NoRedefinition);
   set_redefining(false);
+  set_deoptimization_incl(false);
   set_new_version(NULL);
   set_old_version(NULL);
   set_redefinition_index(-1);
@@ -249,6 +250,8 @@ void Klass::initialize_supers(Klass* k, TRAPS) {
   if (FastSuperclassLimit == 0) {
     // None of the other machinery matters.
     set_super(k);
+    if (k != NULL && k->is_deoptimization_incl())
+      set_deoptimization_incl(true);
     return;
   }
   if (k == NULL) {
@@ -260,6 +263,8 @@ void Klass::initialize_supers(Klass* k, TRAPS) {
            "initialize this only once to a non-trivial value");
     set_super(k);
     Klass* sup = k;
+    if (sup->is_deoptimization_incl())
+      set_deoptimization_incl(true);
     int sup_depth = sup->super_depth();
     juint my_depth  = MIN2(sup_depth + 1, (int)primary_super_limit());
     if (!can_be_primary_super_slow())

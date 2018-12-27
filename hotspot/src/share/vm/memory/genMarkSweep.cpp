@@ -333,8 +333,6 @@ void GenMarkSweep::mark_sweep_phase4() {
   GCTraceTime tm("phase 4", PrintGC && Verbose, true, _gc_timer, _gc_tracer->gc_id());
   trace("4");
 
-  MarkSweep::copy_rescued_objects_back();
-
   GenCompactClosure blk;
   gch->generation_iterate(&blk, true);
 

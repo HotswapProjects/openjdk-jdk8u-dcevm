@@ -259,7 +259,7 @@ void mutex_init() {
   }
   def(Heap_lock                    , Monitor, nonleaf+1,   false);
   def(JfieldIdCreation_lock        , Mutex  , nonleaf+1,   true ); // jfieldID, Used in VM_Operation
-  def(MemberNameTable_lock         , Mutex  , nonleaf+1,   false); // Used to protect MemberNameTable
+  def(MemberNameTable_lock         , Mutex  , nonleaf+1,   true ); // Used to protect MemberNameTable
 
   def(CompiledIC_lock              , Mutex  , nonleaf+2,   false); // locks VtableStubs_lock, InlineCacheBuffer_lock
   def(CompileTaskAlloc_lock        , Mutex  , nonleaf+2,   true );

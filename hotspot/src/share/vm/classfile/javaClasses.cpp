@@ -1709,6 +1709,8 @@ void java_lang_Throwable::fill_in_stack_trace(Handle throwable, methodHandle met
         skip_throwableInit_check = true;
       }
     }
+    // (DCEVM): Line numbers from newest version must be used for EMCP-swapped methods
+    method = method->newest_version();
     if (method->is_hidden()) {
       if (skip_hidden)  continue;
     }

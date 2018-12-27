@@ -416,6 +416,7 @@ class Universe: AllStatic {
   static void run_finalizers_on_exit();
 
   // Iteration
+  static void root_oops_do(OopClosure *f);
 
   // Apply "f" to the addresses of all the direct heap pointers maintained
   // as static fields of "Universe".

@@ -1074,6 +1074,7 @@ static jclass jvm_define_class_common(JNIEnv *env, const char *name,
   Klass* k = SystemDictionary::resolve_from_stream(class_name, class_loader,
                                                      protection_domain, &st,
                                                      verify != 0,
+                                                     KlassHandle(),
                                                      CHECK_NULL);
 
   if (TraceClassResolution && k != NULL) {

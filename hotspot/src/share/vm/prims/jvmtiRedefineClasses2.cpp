@@ -1209,13 +1209,8 @@ public:
 
     if (obj->klass()->new_version() != NULL) {
       Klass* new_klass = obj->klass()->new_version();
-      /* FIXME: if (obj->is_perm()) {
-        _needs_instance_update = true;
-      } else */if(new_klass->update_information() != NULL) {
-        int size_diff = obj->size() - obj->size_given_klass(new_klass);
-
-        // Either new size is bigger or gap is to small to be filled
-        if (UseConcMarkSweepGC && size_diff != 0 || (size_diff < 0 || (size_diff > 0 && (size_t) size_diff < CollectedHeap::min_fill_size()))) {
+      if(new_klass->update_information() != NULL) {
+        if (obj->size() - obj->size_given_klass(new_klass) != 0) {
           // We need an instance update => set back to old klass
           _needs_instance_update = true;
         } else {
@@ -1227,10 +1222,6 @@ public:
           src->set_klass(obj->klass()->new_version());
           MarkSweep::update_fields(obj, src, new_klass->update_information());
 
-          if (size_diff > 0) {
-            HeapWord* dead_space = ((HeapWord *)obj) + obj->size();
-            CollectedHeap::fill_with_object(dead_space, size_diff);
-          }
         }
       } else {
         obj->set_klass(obj->klass()->new_version());
@@ -1340,7 +1331,7 @@ void VM_EnhancedRedefineClasses::doit() {
 
   RC_TIMER_STOP(_timer_heap_iteration);
   RC_TIMER_START(_timer_redefinition);
-  if (objectClosure.needs_instance_update()) {
+  //if (objectClosure.needs_instance_update()) {
     // Do a full garbage collection to update the instance sizes accordingly
     RC_TRACE(0x00000001, ("Before performing full GC!"));
     Universe::set_redefining_gc_run(true);
@@ -1349,7 +1340,7 @@ void VM_EnhancedRedefineClasses::doit() {
     notify_gc_end();
     Universe::set_redefining_gc_run(false);
     RC_TRACE(0x00000001, ("GC done!"));
-  }
+  //}
 
   // Unmark Klass*s as "redefining"
   for (int i=0; i<_new_classes->length(); i++) {

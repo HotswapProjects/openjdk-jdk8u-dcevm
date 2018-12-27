@@ -121,7 +121,7 @@ inline HeapWord* Space::block_start(const void* p) {
       /* see if we might want to pretend this object is alive so that        \
        * we don't have to compact quite as often.                            \
        */                                                                    \
-      if (allowed_deadspace > 0 && q == compact_top) {                       \
+      if (!redefinition_run && allowed_deadspace > 0 && q == compact_top) {   \
         size_t sz = pointer_delta(end, q);                                   \
         if (insert_deadspace(allowed_deadspace, q, sz)) {                    \
           compact_top = cp->space->forward(oop(q), sz, cp, compact_top,      \

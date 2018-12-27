@@ -84,6 +84,8 @@
 
 PRAGMA_FORMAT_MUTE_WARNINGS_FOR_GCC
 
+bool Universe::_is_redefining_gc_run = false;
+
 // Known objects
 Klass* Universe::_boolArrayKlassObj                 = NULL;
 Klass* Universe::_byteArrayKlassObj                 = NULL;

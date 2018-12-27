@@ -251,7 +251,13 @@ class Universe: AllStatic {
 
   static void compute_verify_oop_data();
 
+  static bool _is_redefining_gc_run;
+
  public:
+
+   static bool is_redefining_gc_run()               { return _is_redefining_gc_run; }
+   static void set_redefining_gc_run(bool b)        { _is_redefining_gc_run = b;    }
+
   // Known classes in the VM
   static Klass* boolArrayKlassObj()                 { return _boolArrayKlassObj;   }
   static Klass* byteArrayKlassObj()                 { return _byteArrayKlassObj;   }

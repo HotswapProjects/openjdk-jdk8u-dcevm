@@ -149,6 +149,7 @@ inline HeapWord* Space::block_start(const void* p) {
       /* see if this is the first dead region. */                            \
       if (q < first_dead) {                                                  \
         first_dead = q;                                                      \
+        force_forward = true;                                                \
       }                                                                      \
                                                                              \
       /* move on to the next object */                                       \

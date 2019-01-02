@@ -1256,7 +1256,9 @@ void VM_EnhancedRedefineClasses::doit() {
   }
 
   // Deoptimize all compiled code that depends on this class
-  flush_dependent_code(instanceKlassHandle(Thread::current(), (Klass*)NULL), Thread::current());
+  if (_max_redefinition_flags > Klass::ModifyClass) {
+    flush_dependent_code(NULL, Thread::current());
+  }
 
   // Adjust constantpool caches for all classes
   // that reference methods of the evolved class.
@@ -1566,7 +1568,7 @@ void VM_EnhancedRedefineClasses::update_jmethod_ids() {
 // subsequent calls to RedefineClasses need only throw away code
 // that depends on the class.
 //
-void VM_EnhancedRedefineClasses::flush_dependent_code(instanceKlassHandle k_h, TRAPS) {
+void VM_EnhancedRedefineClasses::flush_dependent_code(Klass *klass, TRAPS) {
   assert_locked_or_safepoint(Compile_lock);
 
   // All dependencies have been recorded from startup or this is a second or
@@ -1574,8 +1576,16 @@ void VM_EnhancedRedefineClasses::flush_dependent_code(instanceKlassHandle k_h, T
 
   // For now deopt all
   // (tw) TODO: Improve the dependency system such that we can safely deopt only a subset of the methods
-  if (0 && JvmtiExport::all_dependencies_are_recorded()) {
+  if (klass != NULL && JvmtiExport::all_dependencies_are_recorded()) {
+    instanceKlassHandle k_h = instanceKlassHandle(THREAD, klass);
     Universe::flush_evol_dependents_on(k_h);
+    Klass* super_class = klass->super();
+    // Deoptimize super classes since redefined class can has a new method override
+    while (super_class != NULL && !super_class->is_redefining()) {
+      instanceKlassHandle super_class_handle = instanceKlassHandle(THREAD, super_class);
+      Universe::flush_evol_dependents_on(super_class_handle);
+      super_class = super_class->super();
+    }
   } else {
   	if (HotswapDeoptClassPath == NULL)
   		CodeCache::mark_all_nmethods_for_deoptimization();
@@ -1680,6 +1690,12 @@ void VM_EnhancedRedefineClasses::redefine_single_class(instanceKlassHandle the_n
   JvmtiBreakpoints& jvmti_breakpoints = JvmtiCurrentBreakpoints::get_jvmti_breakpoints();
   jvmti_breakpoints.clearall_in_class_at_safepoint(the_old_class());
 #endif // !JVMTI_KERNEL
+
+  // DCEVM Deoptimization is always for whole java world, call only once after all classes are redefined
+  // Deoptimize all compiled code that depends on this class
+  if (_max_redefinition_flags <= Klass::ModifyClass) {
+    flush_dependent_code(the_old_class(), THREAD);
+  }
 
   /* FIXME
   if (the_old_class() == Universe::reflect_invoke_cache()->klass()) {

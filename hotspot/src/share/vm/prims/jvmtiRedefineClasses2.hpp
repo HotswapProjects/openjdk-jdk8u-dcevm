@@ -101,8 +101,7 @@ class VM_EnhancedRedefineClasses: public VM_GC_Operation {
   // and in all direct and indirect subclasses.
   void increment_class_counter(Klass* klass, TRAPS);
 
-
-  void flush_dependent_code(instanceKlassHandle k_h, TRAPS);
+  void flush_dependent_code(Klass* klass, TRAPS);
 
   static void check_class(Klass* k_oop,/* oop initiating_loader,*/ TRAPS) PRODUCT_RETURN;
 

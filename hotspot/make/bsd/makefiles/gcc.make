@@ -87,6 +87,7 @@ ifeq ($(OS_VENDOR), Darwin)
   ifeq ($(DSYMUTIL),)
     DSYMUTIL=dsymutil
   endif
+  XCODE_VER := $(shell xcodebuild -version | head -n1 | sed 's/Xcode //' | cut -d'.' -f1)
 endif
 
 ifeq ($(USE_CLANG), true)
@@ -267,7 +268,15 @@ ifeq "$(shell expr \( $(CC_VER_MAJOR) \> 4 \) \| \( \( $(CC_VER_MAJOR) = 4 \) \&
   # conversions which might affect the values. Only enable it in earlier versions.
   WARNING_FLAGS = -Wunused-function
   ifeq ($(USE_CLANG),)
-    WARNING_FLAGS += -Wconversion
+     ifeq ($(OS_VENDOR), Darwin)
+       ifeq "$(shell expr $(XCODE_VER) \>= 9 )" "1"
+         WARNING_FLAGS += -Wno-conversion -Wno-logical-op-parentheses -Wno-tautological-undefined-compare -Wno-shift-negative-value -Wno-switch -Wno-format -Wno-shorten-64-to-32 -Wno-sign-conversion
+       else
+         WARNING_FLAGS += -Wconversion
+       endif
+     else
+       WARNING_FLAGS += -Wconversion
+     endif
   endif
 endif
 
@@ -327,11 +336,6 @@ endif
 
 # Flags for generating make dependency flags.
 DEPFLAGS = -MMD -MP -MF $(DEP_DIR)/$(@:%=%.d)
-ifeq ($(USE_CLANG),)
-  ifneq ($(CC_VER_MAJOR), 2)
-    DEPFLAGS += -fpch-deps
-  endif
-endif
 
 # -DDONT_USE_PRECOMPILED_HEADER will exclude all includes in precompiled.hpp.
 ifeq ($(USE_PRECOMPILED_HEADER),0)

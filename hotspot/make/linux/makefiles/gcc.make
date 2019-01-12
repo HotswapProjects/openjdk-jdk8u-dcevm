@@ -184,6 +184,10 @@ AOUT_FLAGS += $(ARCHFLAG)
 LFLAGS     += $(ARCHFLAG)
 ASFLAGS    += $(ARCHFLAG)
 
+ifeq ($(DEBUG_BINARIES), true)
+  ASFLAGS    += $(ASFLAGS_DEBUG_SYMBOLS)
+endif
+
 # Use C++ Interpreter
 ifdef CC_INTERP
   CFLAGS += -DCC_INTERP
@@ -215,6 +219,17 @@ ifeq ($(USE_CLANG),)
   ifeq "$(shell expr \( $(CC_VER_MAJOR) \> 4 \) \| \( \( $(CC_VER_MAJOR) = 4 \) \& \( $(CC_VER_MINOR) \>= 3 \) \))" "0"
     WARNING_FLAGS += -Wconversion
   endif
+
+  # Since GCC 5, there are some deprecated declarations warnings. They break compilation
+  ifeq "$(shell expr \( $(CC_VER_MAJOR) \>= 5 \) )" "1"
+    WARNING_FLAGS += -Wno-error=deprecated-declarations 
+  endif
+
+  # GCC 6 compilation fix
+  ifeq "$(shell expr \( $(CC_VER_MAJOR) \>= 6 \) )" "1"
+    WARNING_FLAGS += -std=gnu++98
+  endif
+
 endif
 
 CFLAGS_WARN/DEFAULT = $(WARNINGS_ARE_ERRORS) $(WARNING_FLAGS)
@@ -273,6 +288,8 @@ endif
 
 # statically link libstdc++.so, work with gcc but ignored by g++
 STATIC_STDCXX = -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
+# While the VM needs the above line, adlc needs a separate setting:
+ADLC_STATIC_STDCXX = -static-libstdc++
 
 ifeq ($(USE_CLANG),)
   # statically link libgcc and/or libgcc_s, libgcc does not exist before gcc-3.x.

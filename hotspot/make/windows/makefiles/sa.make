@@ -85,11 +85,11 @@ checkAndBuildSA:: $(SAWINDBG)
 # will be useful to have the assertion checks in place
 
 !if "$(BUILDARCH)" == "ia64"
-SA_CFLAGS = -nologo $(MS_RUNTIME_OPTION) -W3 $(GX_OPTION) -Od -D "WIN32" -D "WIN64" -D "_WINDOWS" -D "_DEBUG" -D "_CONSOLE" -D "_MBCS" -FD -c
+SA_CFLAGS = -nologo $(MS_RUNTIME_OPTION) -W0 $(GX_OPTION) -Od -D "WIN32" -D "WIN64" -D "_WINDOWS" -D "_DEBUG" -D "_CONSOLE" -D "_MBCS" -FD -c
 !elseif "$(BUILDARCH)" == "amd64"
-SA_CFLAGS = -nologo $(MS_RUNTIME_OPTION) -W3 $(GX_OPTION) -Od -D "WIN32" -D "WIN64" -D "_WINDOWS" -D "_DEBUG" -D "_CONSOLE" -D "_MBCS" -FD -c
+SA_CFLAGS = -nologo $(MS_RUNTIME_OPTION) -W0 $(GX_OPTION) -Od -D "WIN32" -D "WIN64" -D "_WINDOWS" -D "_DEBUG" -D "_CONSOLE" -D "_MBCS" -FD -c
 !else
-SA_CFLAGS = -nologo $(MS_RUNTIME_OPTION) -W3 $(GX_OPTION) -Od -D "WIN32" -D "_WINDOWS" -D "_DEBUG" -D "_CONSOLE" -D "_MBCS" -FD -RTC1 -c
+SA_CFLAGS = -nologo $(MS_RUNTIME_OPTION) -W0 $(GX_OPTION) -Od -D "WIN32" -D "_WINDOWS" -D "_DEBUG" -D "_CONSOLE" -D "_MBCS" -FD -RTC1 -c
 !if "$(ENABLE_FULL_DEBUG_SYMBOLS)" == "1"
 SA_CFLAGS = $(SA_CFLAGS) -ZI
 !endif

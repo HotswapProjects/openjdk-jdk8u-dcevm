@@ -22,8 +22,7 @@
 //  
 //
 
-#include <windows.h>
-#include "winresrc.h"
+#include <winresrc.h>
 
 // Need 2 defines so macro argument to XSTR will get expanded before quoting.
 #define XSTR(x) STR(x)

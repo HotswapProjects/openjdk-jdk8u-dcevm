@@ -43,6 +43,7 @@
 #include "prims/jvmtiManageCapabilities.hpp"
 #include "prims/jvmtiRawMonitor.hpp"
 #include "prims/jvmtiRedefineClasses.hpp"
+#include "prims/jvmtiRedefineClasses2.hpp"
 #include "prims/jvmtiTagMap.hpp"
 #include "prims/jvmtiThreadState.inline.hpp"
 #include "prims/jvmtiUtil.hpp"
@@ -207,8 +208,10 @@ JvmtiEnv::GetClassLoaderClasses(jobject initiating_loader, jint* class_count_ptr
 // is_modifiable_class_ptr - pre-checked for NULL
 jvmtiError
 JvmtiEnv::IsModifiableClass(oop k_mirror, jboolean* is_modifiable_class_ptr) {
-  *is_modifiable_class_ptr = VM_RedefineClasses::is_modifiable_class(k_mirror)?
-                                                       JNI_TRUE : JNI_FALSE;
+  bool is_modifiable_class = AllowEnhancedClassRedefinition ?
+    VM_EnhancedRedefineClasses::is_modifiable_class(k_mirror) :
+    VM_RedefineClasses::is_modifiable_class(k_mirror);
+  *is_modifiable_class_ptr = is_modifiable_class ? JNI_TRUE : JNI_FALSE;
   return JVMTI_ERROR_NONE;
 } /* end IsModifiableClass */
 
@@ -277,6 +280,11 @@ JvmtiEnv::RetransformClasses(jint class_count, const jclass* classes) {
     }
     class_definitions[index].klass              = jcls;
   }
+  if (AllowEnhancedClassRedefinition) {
+    VM_EnhancedRedefineClasses op(class_count, class_definitions, jvmti_class_load_kind_retransform);
+    VMThread::execute(&op);
+    return (op.check_error());
+  }
   VM_RedefineClasses op(class_count, class_definitions, jvmti_class_load_kind_retransform);
   VMThread::execute(&op);
   return (op.check_error());
@@ -288,6 +296,11 @@ JvmtiEnv::RetransformClasses(jint class_count, const jclass* classes) {
 jvmtiError
 JvmtiEnv::RedefineClasses(jint class_count, const jvmtiClassDefinition* class_definitions) {
 //TODO: add locking
+  if (AllowEnhancedClassRedefinition) {
+    VM_EnhancedRedefineClasses op(class_count, class_definitions, jvmti_class_load_kind_redefine);
+    VMThread::execute(&op);
+    return (op.check_error());
+  }
   VM_RedefineClasses op(class_count, class_definitions, jvmti_class_load_kind_redefine);
   VMThread::execute(&op);
   return (op.check_error());

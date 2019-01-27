@@ -1498,6 +1498,12 @@ JVM_NewInstanceFromConstructor(JNIEnv *env, jobject c, jobjectArray args0);
 JNIEXPORT void* JNICALL
 JVM_GetManagement(jint version);
 
+JNIEXPORT jint JNICALL
+JVM_GetVmMemoryPressure();
+
+JNIEXPORT void JNICALL
+JVM_SetVmMemoryPressure(jint pressure);
+
 /*
  * com.sun.tools.attach.VirtualMachine support
  *

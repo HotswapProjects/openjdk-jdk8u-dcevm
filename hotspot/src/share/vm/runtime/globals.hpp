@@ -1323,6 +1323,9 @@ class CommandLineFlags {
   product(intx, TraceRedefineClasses, 0,                                    \
           "Trace level for JVMTI RedefineClasses")                          \
                                                                             \
+  product(bool, AllowEnhancedClassRedefinition, true,                       \
+          "Allow enhanced class redefinition beyond swapping method bodies")\
+                                                                            \
   develop(bool, StressMethodComparator, false,                              \
           "Run the MethodComparator on all loaded methods")                 \
                                                                             \
@@ -4021,6 +4024,15 @@ class CommandLineFlags {
                                                                             \
   JFR_ONLY(product(bool, LogJFR, false,                                     \
           "Enable JFR logging (consider +Verbose)"))                        \
+                                                                            \
+  product(ccstr, HotswapDeoptClassPath, NULL,                               \
+          "Comma separated list of packages containing classes that are "   \
+          "expected to be redefined. If com.sun.proxy is used by "          \
+          "application and proxied class is redefined, then this option "   \
+          "should contain 'com.sun.proxy'. If the option is not defined, "  \
+          "then all classes will be deoptimized on hotswap. Using this "    \
+          "option improves hotswap performance. ")
+
 
 /*
  *  Macros for factoring of globals

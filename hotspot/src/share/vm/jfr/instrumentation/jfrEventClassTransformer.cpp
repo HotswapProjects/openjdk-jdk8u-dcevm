@@ -1409,8 +1409,10 @@ TempNewSymbol parsed_name = NULL;
                             class_name,
                             cld,
                             pd,
+                            NULL, // old class
                             NULL, // host klass
                             NULL, // cp_patches
+                            NULL, // parsed_super_symbols
                             parsed_name,
                             true, // need_verify
                             THREAD)();

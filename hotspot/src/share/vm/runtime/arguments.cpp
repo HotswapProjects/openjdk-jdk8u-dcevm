@@ -68,6 +68,8 @@
 #include "gc_implementation/parallelScavenge/parallelScavengeHeap.hpp"
 #endif // INCLUDE_ALL_GCS
 
+#define VENDOR_URL_VM_BUG "https://github.com/dcevm/dcevm/issues"
+
 // Note: This is a special bug reporting site for the JVM
 #ifdef VENDOR_URL_VM_BUG
 # define DEFAULT_VENDOR_URL_BUG VENDOR_URL_VM_BUG
@@ -1586,7 +1588,10 @@ void Arguments::set_conservative_max_heap_alignment() {
 }
 
 void Arguments::select_gc_ergonomically() {
-  if (os::is_server_class_machine()) {
+  if (AllowEnhancedClassRedefinition) {
+    // (DCEVM) enforces serial GC
+    FLAG_SET_ERGO(bool, UseSerialGC, true);
+  } else if (os::is_server_class_machine()) {
     if (should_auto_select_low_pause_collector()) {
       FLAG_SET_ERGO(bool, UseConcMarkSweepGC, true);
     } else {
@@ -2244,6 +2249,17 @@ bool Arguments::check_gc_consistency() {
   if (UseConcMarkSweepGC || UseParNewGC) i++;
   if (UseParallelGC || UseParallelOldGC) i++;
   if (UseG1GC)                           i++;
+
+  if (AllowEnhancedClassRedefinition) {
+    // (DCEVM) Must use serial GC. This limitation applies because the instance size changing GC modifications
+    // are only built into the mark and compact algorithm.
+    if (!UseSerialGC && i >= 1) {
+      jio_fprintf(defaultStream::error_stream(),
+                    "Must use the serial GC in the DCEVM\n");
+      status = false;
+    }
+  }
+
   if (i > 1) {
     jio_fprintf(defaultStream::error_stream(),
                 "Conflicting collector combinations in option list; "

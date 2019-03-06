@@ -1256,7 +1256,7 @@ void VM_EnhancedRedefineClasses::doit() {
   }
 
   // Deoptimize all compiled code that depends on this class
-  if (_max_redefinition_flags > Klass::ModifyClass) {
+  if (HotswapDeoptClassPath != NULL || _max_redefinition_flags > Klass::ModifyClass) {
     flush_dependent_code(NULL, Thread::current());
   }
 
@@ -1693,7 +1693,7 @@ void VM_EnhancedRedefineClasses::redefine_single_class(instanceKlassHandle the_n
 
   // DCEVM Deoptimization is always for whole java world, call only once after all classes are redefined
   // Deoptimize all compiled code that depends on this class
-  if (_max_redefinition_flags <= Klass::ModifyClass) {
+  if (HotswapDeoptClassPath == NULL && _max_redefinition_flags <= Klass::ModifyClass) {
     flush_dependent_code(the_old_class(), THREAD);
   }
 

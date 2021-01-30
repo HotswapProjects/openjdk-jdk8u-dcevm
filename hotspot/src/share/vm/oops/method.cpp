@@ -80,7 +80,8 @@ Method* Method::allocate(ClassLoaderData* loader_data,
   return new (loader_data, size, false, MetaspaceObj::MethodType, THREAD) Method(cm, access_flags, size);
 }
 
-Method::Method(ConstMethod* xconst, AccessFlags access_flags, int size) {
+Method::Method(ConstMethod* xconst, AccessFlags access_flags, int size) : _new_version(NULL),
+                                                                         _old_version(NULL) {
   No_Safepoint_Verifier no_safepoint;
   set_constMethod(xconst);
   set_access_flags(access_flags);

@@ -1032,7 +1032,7 @@ Klass* SystemDictionary::parse_stream(Symbol* class_name,
   // Callers are expected to declare a ResourceMark to determine
   // the lifetime of any updated (resource) allocated under
   // this call to parseClassFile
-  ResourceMark rm(THREAD);
+  // ResourceMark rm(THREAD);
   k = ClassFileParser(st).parseClassFile(class_name,
                                          loader_data,
                                          protection_domain,
@@ -1131,9 +1131,9 @@ Klass* SystemDictionary::resolve_from_stream(Symbol* class_name,
   //
   // Note: "name" is updated.
 
-    ResourceMark rm(THREAD);
+    // ResourceMark rm(THREAD);
     ClassFileParser parser(st);
-    instanceKlassHandle k = ClassFileParser(st).parseClassFile(class_name,
+    instanceKlassHandle k = parser.parseClassFile(class_name,
                                                              loader_data,
                                                              protection_domain,
                                                              old_class,
